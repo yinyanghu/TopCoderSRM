@@ -16,6 +16,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <cstring>
 
 using namespace std;
 
@@ -24,8 +25,47 @@ public:
 	vector <int> getExpectation(vector <int>, vector <int>);
 };
 
+const int maxN = 100010;
+const int maxM = 305;
+const long long MOD = 1000000007LL;
+
+long long S1[maxN][maxM];
+long long S2[maxM][maxM];
+long long factorial[maxM];
+
 vector <int> CyclesNumber::getExpectation(vector <int> n, vector <int> m) {
-	
+	factorial[0] = 1;
+	for (int i = 1; i < maxM; ++ i)
+		factorial[i] = (factorial[i - 1] * (long long)i) % MOD;
+
+	memset(S1, 0, sizeof(S1));
+	S1[0][0] = 1;
+	for (int i = 1; i < maxN; ++ i) {
+		for (int j = 1; j < maxM; ++ j)
+			S1[i][j] = (S1[i - 1][j - 1] + ((long long)(i - 1) * S1[i - 1][j]) % MOD) % MOD;
+	}
+
+	memset(S2, 0, sizeof(S2));
+	S2[0][0] = 1;
+	for (int i = 1; i < maxM; ++ i) {
+		for (int j = 1; j < i; ++ j)
+			S2[i][j] = (S2[i - 1][j - 1] + ((long long)j * S2[i - 1][j]) % MOD) % MOD;
+		S2[i][i] = 1;
+	}
+
+	vector<int> ret;
+	for (int i = 0; i < n.size(); ++ i) {
+		int N = n[i];
+		int M = m[i];
+
+		long long ans = 0;
+		for (int k = 0; k <= M; ++ k)
+			ans = (ans + (((S1[N + 1][k + 1] * S2[M][k]) % MOD) * factorial[k]) % MOD) % MOD;
+
+		ret.push_back((int)ans);
+	}
+
+	return ret;
 }
 
 
